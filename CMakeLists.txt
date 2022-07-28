@@ -23,7 +23,6 @@ target_include_directories(${PROJECT_NAME} PRIVATE
   libraries/cocos-headers/cocos2dx
   src/pathfinder.hpp
   src/replay-system.hpp
-  src/fembot.hpp
 )
 
 add_subdirectory(libraries/minhook)

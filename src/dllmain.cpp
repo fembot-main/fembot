@@ -3,7 +3,8 @@
 #include <fstream>
 
 #include "includes.h"
-#include "fembot.hpp"
+#include "fembot/fembot.hpp"
+#include "fembot/gui/gui.hpp"
 
 #define _CONSOLE
 
@@ -36,6 +37,7 @@ DWORD WINAPI thread_func(void* hModule) {
 
 BOOL APIENTRY DllMain(HMODULE handle, DWORD reason, LPVOID reserved) {
     if (reason == DLL_PROCESS_ATTACH) {
+        FembotGUI::getInstance().init();
         auto h = CreateThread(0, 0, thread_func, handle, 0, 0);
         if (h)
             CloseHandle(h);
