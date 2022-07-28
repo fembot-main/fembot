@@ -16,7 +16,7 @@ DWORD WINAPI thread_func(void* hModule) {
     std::cout.rdbuf(conout.rdbuf());
     std::cin.rdbuf(conin.rdbuf());
     #endif
-    std::cout << "Fembot injected!" << std::endl;
+    std::cout << "Fembot injected" << std::endl;
 
     // Start the bot
     Fembot::getInstance().run();
