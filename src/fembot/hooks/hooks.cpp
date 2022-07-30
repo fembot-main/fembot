@@ -2,6 +2,7 @@
 
 #include "../replay_system/replay_system.hpp"
 #include "../gui/gui.hpp"
+#include "../replay/replay.hpp"
 
 float leftOver = 0.f;
 

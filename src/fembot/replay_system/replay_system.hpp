@@ -1,10 +1,13 @@
 #pragma once
 
+#include "../replay/replay.hpp"
+
 class FembotReplaySystem {
 protected:
-    FembotReplaySystem() {}
+    FembotReplaySystem(): fps(60.f), replay(fps) {}
 
-    float fps = 60.f;
+    float fps;
+    FembotReplay replay;
 public:
     static FembotReplaySystem& getInstance() {
         static FembotReplaySystem instance;
