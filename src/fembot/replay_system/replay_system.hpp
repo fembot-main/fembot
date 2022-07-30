@@ -1,3 +1,5 @@
+#pragma once
+
 class FembotReplaySystem {
 protected:
     FembotReplaySystem() {}

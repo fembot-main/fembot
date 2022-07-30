@@ -1,7 +1,11 @@
+#pragma once
+
+#include "../../includes.h"
+
 class FembotGUI {
 protected:
     FembotGUI() {}
-
+    bool show_gui = true;
 public:
     static FembotGUI& getInstance() {
         static FembotGUI instance;
@@ -12,6 +16,14 @@ public:
 
     float fps = 60.f;
 
-    void render();
     void init();
+    void toggleGUI() {
+        show_gui = !show_gui;
+    }
+
+    bool shouldRender() {
+        return show_gui;
+    }
 };
+
+void renderGUI();

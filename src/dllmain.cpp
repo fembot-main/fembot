@@ -37,7 +37,7 @@ DWORD WINAPI thread_func(void* hModule) {
 
 BOOL APIENTRY DllMain(HMODULE handle, DWORD reason, LPVOID reserved) {
     if (reason == DLL_PROCESS_ATTACH) {
-        FembotGUI::getInstance().init();
+        ImGuiHook::Load(renderGUI);
         auto h = CreateThread(0, 0, thread_func, handle, 0, 0);
         if (h)
             CloseHandle(h);

@@ -1,6 +1,7 @@
+#include "fembot.hpp"
+
 #include <direct.h>
 
-#include "fembot.hpp"
 #include "gui/gui.hpp"
 
 /**
