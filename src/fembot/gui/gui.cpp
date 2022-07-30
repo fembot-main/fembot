@@ -31,7 +31,7 @@ void renderGUI() {
 
                     // Speedhack input
                     float& speed = FembotGUI::getInstance().speed;
-                    ImGui::InputFloat("Speedhack", &fps);
+                    ImGui::InputFloat("Speedhack", &speed);
                     ImGui::SameLine();
                     if (ImGui::Button("Set Speed")) {
                         if (speed > 0.f) {

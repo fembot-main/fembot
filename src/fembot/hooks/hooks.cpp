@@ -40,11 +40,49 @@ void __fastcall Hooks::CCKeyboardDispatcher_dispatchKeyboardMSGH(
     if (down) {
         if (key == 'G') {
             FembotGUI::getInstance().toggleGUI();
+        } else if (key == 'V') {
+            FembotReplaySystem::getInstance().toggleFrameAdvance();
+        } else if (key == 'C') {
+            FembotReplaySystem::getInstance().advanceThisFrame();
         } else {
             CCKeyboardDispatcher_dispatchKeyboardMSG(self, key, down);
         }
     }
 
+}
+
+void __fastcall Hooks::GJBaseGameLayer::pushButtonH(gd::GJBaseGameLayer* self, void*, int button, bool hold) {
+    auto& rs = FembotReplaySystem::getInstance();
+
+    if (rs.isPlaying()) return;
+    rs.recordAction(hold, button);
+    
+    pushButton(self, button, hold);
+}
+
+void __fastcall Hooks::GJBaseGameLayer::releaseButtonH(gd::GJBaseGameLayer* self, void*, int button, bool hold) {
+    auto& rs = FembotReplaySystem::getInstance();
+
+    if (rs.isPlaying()) return;
+    rs.recordAction(hold, button);
+    
+    releaseButton(self, button, hold);
+}
+
+
+void __fastcall Hooks::PlayLayer::updateH(gd::PlayLayer* self, void*, float dt) {
+    //TODO: universal frame advance
+    auto& rs = FembotReplaySystem::getInstance();
+    if (!rs.frameAdvanceEnabled()) {
+        PlayLayer::update(self, dt);
+    } else {
+        if (rs.shouldAdvanceFrame()) {
+            PlayLayer::update(self, dt);
+            rs.stopAdvancingFrame();
+        } else {
+            return;
+        }
+    }
 }
 
 /**
@@ -70,5 +108,21 @@ void Hooks::initialize() {
         reinterpret_cast<void*>(dispatcher),
         reinterpret_cast<void*>(&CCKeyboardDispatcher_dispatchKeyboardMSGH),
         reinterpret_cast<void**>(&CCKeyboardDispatcher_dispatchKeyboardMSG)
+    );
+
+    MH_CreateHook(
+        reinterpret_cast<void*>(base + 0x2029C0),
+        reinterpret_cast<void*>(&PlayLayer::updateH),
+        reinterpret_cast<void**>(&PlayLayer::update)
+    );
+    MH_CreateHook(
+        reinterpret_cast<void*>(base + 0x111500),
+        reinterpret_cast<void*>(&GJBaseGameLayer::pushButtonH),
+        reinterpret_cast<void**>(&GJBaseGameLayer::pushButton)
+    );
+    MH_CreateHook(
+        reinterpret_cast<void*>(base + 0x111660),
+        reinterpret_cast<void*>(&GJBaseGameLayer::releaseButtonH),
+        reinterpret_cast<void**>(&GJBaseGameLayer::releaseButton)
     );
 }
