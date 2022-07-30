@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <algorithm>
+#include <string>
 
 struct ReplayAction {
     unsigned int frame;
