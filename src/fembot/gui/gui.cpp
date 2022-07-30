@@ -29,6 +29,21 @@ void renderGUI() {
                     }
                     // End FPS input
 
+                    // Speedhack input
+                    float& speed = FembotGUI::getInstance().speed;
+                    ImGui::InputFloat("Speedhack", &fps);
+                    ImGui::SameLine();
+                    if (ImGui::Button("Set Speed")) {
+                        if (speed > 0.f) {
+                            FembotReplaySystem::getInstance().setSpeed(speed);
+                        } else {
+                            ImGui::OpenPopup("Error");
+                            FembotReplaySystem::getInstance().setSpeed(speed);
+                            speed = 1.f;
+                        }
+                    }
+                    // End speedhack input
+
                     ImGui::EndTabItem();
                 }
             }

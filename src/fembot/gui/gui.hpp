@@ -15,6 +15,7 @@ public:
     FembotGUI(const FembotGUI&) = delete;
 
     float fps = 60.f;
+    float speed = 1.f;
 
     void init();
     void toggleGUI() {

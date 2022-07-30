@@ -9,6 +9,7 @@ float leftOver = 0.f;
 void __fastcall Hooks::CCScheduler_updateH(CCScheduler* self, void*, float dt) {
     const auto playLayer = gd::GameManager::sharedState()->getPlayLayer();
 
+    // FPS Bypass
     if (playLayer) {
         const auto fps = FembotReplaySystem::getInstance().getFPS();
         const auto speedhack = self->getTimeScale();
@@ -39,8 +40,11 @@ void __fastcall Hooks::CCKeyboardDispatcher_dispatchKeyboardMSGH(
     if (down) {
         if (key == 'G') {
             FembotGUI::getInstance().toggleGUI();
+        } else {
+            CCKeyboardDispatcher_dispatchKeyboardMSG(self, key, down);
         }
     }
+
 }
 
 /**

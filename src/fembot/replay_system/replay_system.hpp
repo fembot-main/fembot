@@ -23,4 +23,9 @@ public:
     void setFPS(float fps) {
         this->fps = fps;
     }
+
+    void setSpeed(float speed) {
+        CCDirector::sharedDirector()->getScheduler()->setTimeScale(speed);
+        this->setFPS(this->fps);
+    }
 };
