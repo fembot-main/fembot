@@ -16,6 +16,7 @@ public:
 
     float fps = 60.f;
     float speed = 1.f;
+    char replayName[256];
 
     void init();
     void toggleGUI() {

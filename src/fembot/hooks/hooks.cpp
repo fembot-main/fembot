@@ -3,6 +3,7 @@
 #include "../replay_system/replay_system.hpp"
 #include "../gui/gui.hpp"
 #include "../replay/replay.hpp"
+#include "../practice_fixes/practice_fixes.hpp"
 
 float leftOver = 0.f;
 
@@ -55,6 +56,87 @@ void __fastcall Hooks::CCKeyboardDispatcher_dispatchKeyboardMSGH(
 
 }
 
+void __fastcall Hooks::PlayLayer::levelCompleteH(void* self, void*) {
+    Hooks::PlayLayer::levelComplete(self);
+
+    auto& pf = PracticeFix::getInstance();
+
+    pf.clearActivatedObjects();
+    pf.purgeCheckpoints();
+}
+
+void __fastcall Hooks::PlayLayer::resetLevelH(void* self, void*) {
+    Hooks::PlayLayer::resetLevel(self);
+
+    gd::PlayLayer* playLayer = gd::GameManager::sharedState()->getPlayLayer();
+    auto practice = playLayer->m_isPracticeMode;
+    auto& rs = FembotReplaySystem::getInstance();
+    auto& pf = PracticeFix::getInstance();
+
+    if (rs.isRecording()) {
+        if (practice) {
+            if (pf.hasCheckpoints()) {
+                auto lastCheckpoint = pf.getLastCheckpoint();
+                rs.setFrame(lastCheckpoint.frame);
+                std::vector<ReplayAction>& actions = rs.replay.getActions();
+
+                pf.purgeObjectsToSize(
+                    lastCheckpoint.activatedObjects_limit_player1, 
+                    lastCheckpoint.activatedObjects_limit_player2
+                );
+
+                for (auto& object : pf.getActivatedObjects_player1()) {
+                    object->m_hasBeenActivated = true;
+                }
+                for (auto& object : pf.getActivatedObjects_player1()) {
+                    object->m_hasBeenActivated = true;
+                }
+
+                while (actions.size() != 0 && actions.back().frame >= lastCheckpoint.frame) {
+                    actions.pop_back();
+                }
+
+                lastCheckpoint.player1.updatePlayer(playLayer->m_player1);
+                lastCheckpoint.player2.updatePlayer(playLayer->m_player2);
+            }
+        } else {
+            pf.clearActivatedObjects();
+            rs.resetFrame();
+            rs.replay.resetActions();
+        }
+    }
+    if (rs.isPlaying()) {
+        rs.resetFrame();
+    }
+}
+
+bool __fastcall Hooks::PlayLayer::initH(CCLayer* self, void*, void* GJGameLevel) {
+    auto& rs = FembotReplaySystem::getInstance();
+    auto& pf = PracticeFix::getInstance();
+
+    pf.purgeCheckpoints();
+    pf.clearActivatedObjects();
+    rs.resetFrame();
+
+    if (rs.isRecording()) {
+        rs.replay.resetActions();
+    } else {
+    }
+    return Hooks::PlayLayer::init(self, GJGameLevel);
+}
+
+int __fastcall Hooks::PlayLayer::createCheckpointH(void* self, void*) {
+    PracticeFix::getInstance().createCheckpoint();
+
+    return Hooks::PlayLayer::createCheckpoint(self);
+}
+
+int __fastcall Hooks::PlayLayer::removeCheckpointH(void* self, void*) {
+    PracticeFix::getInstance().popCheckpoint();
+
+    return Hooks::PlayLayer::removeCheckpoint(self);
+}
+
 void __fastcall Hooks::GJBaseGameLayer::pushButtonH(gd::GJBaseGameLayer* self, void*, int button, bool hold) {
     auto& rs = FembotReplaySystem::getInstance();
 
@@ -75,6 +157,10 @@ void __fastcall Hooks::GJBaseGameLayer::releaseButtonH(gd::GJBaseGameLayer* self
 
 
 void __fastcall Hooks::PlayLayer::updateH(gd::PlayLayer* self, void*, float dt) {
+    auto& rs = FembotReplaySystem::getInstance();
+
+    rs.incrementFrame();
+
     PlayLayer::update(self, dt);
 }
 
@@ -108,6 +194,32 @@ void Hooks::initialize() {
         reinterpret_cast<void*>(&PlayLayer::updateH),
         reinterpret_cast<void**>(&PlayLayer::update)
     );
+        MH_CreateHook(
+        reinterpret_cast<void*>(base + 0x1FD3D0),
+        reinterpret_cast<void*>(&Hooks::PlayLayer::levelCompleteH),
+        reinterpret_cast<void**>(&Hooks::PlayLayer::levelComplete)
+    );
+    MH_CreateHook(
+        reinterpret_cast<void*>(base + 0x20BF00),
+        reinterpret_cast<void*>(&Hooks::PlayLayer::resetLevelH),
+        reinterpret_cast<void**>(&Hooks::PlayLayer::resetLevel)
+    );
+    MH_CreateHook(
+        reinterpret_cast<void*>(base + 0x20B050),
+        reinterpret_cast<void*>(&Hooks::PlayLayer::createCheckpointH),
+        reinterpret_cast<void**>(&Hooks::PlayLayer::createCheckpoint)
+    );
+    MH_CreateHook(
+        reinterpret_cast<void*>(base + 0x20B830),
+        reinterpret_cast<void*>(&Hooks::PlayLayer::removeCheckpointH),
+        reinterpret_cast<void**>(&Hooks::PlayLayer::removeCheckpoint)
+    );
+    MH_CreateHook(
+        reinterpret_cast<void*>(base + 0x1FB780),
+        reinterpret_cast<void*>(&Hooks::PlayLayer::initH),
+        reinterpret_cast<void**>(&Hooks::PlayLayer::init)
+    );
+
     MH_CreateHook(
         reinterpret_cast<void*>(base + 0x111500),
         reinterpret_cast<void*>(&GJBaseGameLayer::pushButtonH),

@@ -13,7 +13,6 @@ protected:
 
     unsigned current_frame;
     float fps;
-    FembotReplay replay;
 
     bool frame_advance;
     bool advance_frame;
@@ -26,12 +25,14 @@ public:
         return instance;
     }
 
+    FembotReplay replay;
     FembotReplaySystem(const FembotReplaySystem&) = delete;
 
     float getFPS() const { return fps; }
     void setFPS(float fps) {
         this->fps = fps;
         CCDirector::sharedDirector()->setAnimationInterval(1.f / fps);
+        replay.setFPS(fps);
     }
 
     void setSpeed(float speed) {
@@ -46,6 +47,7 @@ public:
     unsigned getFrame() const { return current_frame; }
     void resetFrame() { current_frame = 0; }
     void incrementFrame() { current_frame++; }
+    void setFrame(unsigned frame) { current_frame = frame; }
 
     bool shouldAdvanceFrame();
     bool frameAdvanceEnabled() const;

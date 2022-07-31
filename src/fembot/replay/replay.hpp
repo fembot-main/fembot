@@ -27,6 +27,10 @@ public:
         return fps;
     }
 
+    void setFPS(float new_fps) {
+        fps = new_fps;
+    }
+
     /**
      * @brief Add an action to the replay
      *
@@ -45,6 +49,14 @@ public:
      */
     auto& getActions() {
         return actions;
+    }
+
+    void resetActions() {
+        actions.clear();
+    }
+
+    void setAllActions(std::vector<ReplayAction> newActions) {
+        actions = newActions;
     }
 
     /**

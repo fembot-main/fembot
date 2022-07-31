@@ -12,6 +12,21 @@ namespace Hooks {
     namespace PlayLayer {
         inline void(__thiscall* update)(gd::PlayLayer* self, float dt);
         void __fastcall updateH(gd::PlayLayer* self, void*, float dt);
+
+        inline bool(__thiscall* init)(CCLayer* self, void* GJGameLevel);
+        bool __fastcall initH(CCLayer* self, void*, void* GJGameLevel);
+
+        inline void(__thiscall* levelComplete)(void* self);
+        void __fastcall levelCompleteH(void* self, void*);
+
+        inline void(__thiscall* resetLevel)(void* self);
+        void __fastcall resetLevelH(void* self, void*);
+        
+        inline int(__thiscall* createCheckpoint)(void* self);
+        int __fastcall createCheckpointH(void* self, void*);
+        
+        inline int(__thiscall* removeCheckpoint)(void* self);
+        int __fastcall removeCheckpointH(void* self, void*);
     }
 
     namespace GJBaseGameLayer {
