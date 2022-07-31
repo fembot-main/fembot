@@ -8,17 +8,21 @@ float leftOver = 0.f;
 
 void __fastcall Hooks::CCScheduler_updateH(CCScheduler* self, void*, float dt) {
     const auto playLayer = gd::GameManager::sharedState()->getPlayLayer();
+    auto& rs = FembotReplaySystem::getInstance();
 
     // FPS Bypass
     if (playLayer) {
-        const auto fps = FembotReplaySystem::getInstance().getFPS();
+        const auto fps = rs.getFPS();
         const auto speedhack = self->getTimeScale();
 
         const float targetDeltaTime = 1.f / (fps * speedhack);
 
         unsigned times = static_cast<int>((dt + leftOver) / targetDeltaTime);
         for (unsigned i = 0; i < times; i++) {
-            CCScheduler_update(self, targetDeltaTime);
+            if ((rs.frameAdvanceEnabled() && rs.shouldAdvanceFrame()) || !rs.frameAdvanceEnabled()) {
+                rs.stopAdvancingFrame();
+                CCScheduler_update(self, targetDeltaTime);
+            }
         }
 
         leftOver += dt - targetDeltaTime * times;
@@ -71,18 +75,7 @@ void __fastcall Hooks::GJBaseGameLayer::releaseButtonH(gd::GJBaseGameLayer* self
 
 
 void __fastcall Hooks::PlayLayer::updateH(gd::PlayLayer* self, void*, float dt) {
-    //TODO: universal frame advance
-    auto& rs = FembotReplaySystem::getInstance();
-    if (!rs.frameAdvanceEnabled()) {
-        PlayLayer::update(self, dt);
-    } else {
-        if (rs.shouldAdvanceFrame()) {
-            PlayLayer::update(self, dt);
-            rs.stopAdvancingFrame();
-        } else {
-            return;
-        }
-    }
+    PlayLayer::update(self, dt);
 }
 
 /**
