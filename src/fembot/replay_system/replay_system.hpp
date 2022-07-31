@@ -28,10 +28,7 @@ public:
 
     FembotReplaySystem(const FembotReplaySystem&) = delete;
 
-    float getFPS() const {
-        return fps;
-    }
-
+    float getFPS() const { return fps; }
     void setFPS(float fps) {
         this->fps = fps;
         CCDirector::sharedDirector()->setAnimationInterval(1.f / fps);
@@ -42,74 +39,20 @@ public:
         this->setFPS(this->fps);
     }
 
-    bool frameAdvanceEnabled() const {
-        return frame_advance;
-    }
+    bool isRecording() const { return state == RS_RECORDING; }
+    bool isPlaying() const { return state == RS_PLAYING; }
+    void setState(ReplaySystemState state) { this->state = state; }
 
-    void toggleFrameAdvance() {
-        frame_advance = !frame_advance;
-    }
+    unsigned getFrame() const { return current_frame; }
+    void resetFrame() { current_frame = 0; }
+    void incrementFrame() { current_frame++; }
 
-    bool shouldAdvanceFrame() {
-        return advance_frame;
-    }
+    bool shouldAdvanceFrame();
+    bool frameAdvanceEnabled() const;
+    void toggleFrameAdvance();
+    void advanceThisFrame();
+    void stopAdvancingFrame();
 
-    void advanceThisFrame() {
-        advance_frame = true;
-    }
-
-    void stopAdvancingFrame() {
-        advance_frame = false;
-    }
-
-    bool isRecording() const {
-        return state == RS_RECORDING;
-    }
-
-    bool isPlaying() const {
-        return state == RS_PLAYING;
-    }
-
-    void setState(ReplaySystemState state) {
-        this->state = state;
-    }
-
-    unsigned getFrame() const {
-        return current_frame;
-    }
-
-    void resetFrame() {
-        current_frame = 0;
-    }
-
-    void incrementFrame() {
-        current_frame++;
-    }
-
-    void recordAction(bool hold, bool player1, bool flip = true) {
-        if (this->isRecording()) {
-            auto playLayer = gd::GameManager::sharedState()->getPlayLayer();
-            auto isTwoPlayer = playLayer->m_levelSettings->m_twoPlayerMode;
-            player1 ^= flip && gd::GameManager::sharedState()->getGameVariable("0010");
-
-            replay.addAction(current_frame, hold, isTwoPlayer && !player1);
-        }
-    }
-
-    void playAction(ReplayAction& action) {
-        auto flip = gd::GameManager::sharedState()->getGameVariable("0010");
-        if (action.hold) {
-            Hooks::GJBaseGameLayer::pushButton(
-                gd::GameManager::sharedState()->getPlayLayer(),
-                0,
-                !action.player2 ^ flip
-            );
-        } else {
-            Hooks::GJBaseGameLayer::releaseButton(
-                gd::GameManager::sharedState()->getPlayLayer(),
-                0,
-                !action.player2 ^ flip
-            );
-        }
-    }
+    void recordAction(bool hold, bool player1, bool flip = true);
+    void playAction(ReplayAction& action);
 };
